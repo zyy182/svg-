@@ -25,11 +25,30 @@ test("anonymous IDs use tag counters, avoid later explicit IDs and warn", () => 
   assert.deepEqual(result.warnings, ["warning: assigned id rect2 to unnamed <rect>", "warning: assigned id circle1 to unnamed <circle>", "warning: assigned id rect3 to unnamed <rect>"]);
 });
 
+test("Unicode identifiers roundtrip and svg remains addressable as a normal shape", () => {
+  const codec = new SvgCodec();
+  const loaded = codec.parse('<svg><g id="svg"><rect id="节点一" width="10" height="20"/><text id="标题">中文</text></g></svg>');
+  assert.equal(loaded.document.find("节点一").parent?.label, "g#svg");
+  assert.equal(codec.parse(loaded.document.toSvg()).document.tree(), loaded.document.tree());
+  assert.deepEqual(loaded.warnings, []);
+});
+
 test("imports course SVG transforms and text presentation without tag-based editing", () => {
   const doc = new SvgCodec().parse('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><g id="g" transform="translate(200,0) scale(0.8)"><rect id="r" x="0" y="0" width="120" height="60"/><text id="t" x="60" y="38" text-anchor="middle" font-size="16" fill="white">End</text></g></svg>').document;
   assert.match(doc.toSvg(), /transform="matrix\(0.8 0 0 0.8 200 0\)"/);
   assert.equal(doc.find("t").attribute("text-anchor"), "middle");
   const copy = new SvgCodec().parse(doc.toSvg()).document; assert.equal(copy.toSvg(), doc.toSvg());
+});
+
+test("unregistered composite metadata is preserved while its SVG g uses ordinary group behavior", () => {
+  const codec = new SvgCodec();
+  const loaded = codec.parse('<svg><g id="n1" data-kind="box"><rect id="n1-rect" width="10" height="20"/><text id="n1-label">Box</text></g></svg>').document;
+  assert.equal(loaded.find("n1").type, "g"); assert.ok(loaded.find("n1").asContainer());
+  const cloned = loaded.clone(); cloned.find("n1").move(3, 4);
+  assert.equal(cloned.find("n1-rect").attribute("x"), "3");
+  assert.match(cloned.toSvg(), /data-kind="box"/);
+  assert.equal(codec.parse(cloned.toSvg()).document.toSvg(), cloned.toSvg());
+  assert.throws(() => cloned.find("n1").set("data-kind", "box"), /unknown attribute/);
 });
 
 test("rejects malformed XML, duplicate IDs, unsupported types and mixed namespaces", () => {
@@ -46,6 +65,16 @@ test("text-only whitespace survives serialization and import accepts comments an
   const codec = new SvgCodec(); const doc = codec.parse('<svg width="100px" height="20px"><!-- comment --><text id="t">  \t </text><rect id="r" width="5px" height="6px" rx="2"/></svg>').document;
   assert.deepEqual(doc.size, [100, 20]); assert.equal(doc.find("r").attribute("ry"), "2");
   assert.equal(codec.parse(doc.toSvg()).document.find("t").attribute("text"), "  \t ");
+});
+
+test("declaration-like text in comments and CDATA does not reject a valid SVG", () => {
+  const source = '<svg><!-- examples: <!DOCTYPE svg> and <!ENTITY x "y"> -->' +
+    '<text id="t"><![CDATA[<!DOCTYPE is plain text here]]></text></svg>';
+  const codec = new SvgCodec(), document = codec.parse(source).document;
+  assert.equal(document.find("t").attribute("text"), "<!DOCTYPE is plain text here");
+  assert.equal(codec.parse(document.toSvg()).document.toSvg(), document.toSvg());
+  assert.throws(() => codec.parse('<!DOCTYPE svg><svg/>'), /DOCTYPE/);
+  assert.throws(() => codec.parse('<!DOCTYPE svg [<!ENTITY x "value">]><svg><text id="t">&x;</text></svg>'), /DOCTYPE/);
 });
 
 test("file adapter handles UTF-8 BOM, actual files and specified file errors", () => {

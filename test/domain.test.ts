@@ -109,3 +109,15 @@ test("SVG IDs are case-sensitive and numeric constraints reject invalid syntax",
   }
   assert.throws(() => new Document(0, 10), /positive/);
 });
+
+test("Unicode XML names and svg are valid shape IDs without weakening name validation", () => {
+  const doc = new Document();
+  for (const id of ["节点一", "étiquette", ":shape", "svg", "节点-2", "😀"]) {
+    doc.add(new Circle(id, 0, 0, 1));
+    assert.equal(doc.find(id).id, id);
+  }
+  for (const id of ["", "has space", "1circle", "-circle", ".circle", "x\u0000", "x/y"]) {
+    assert.throws(() => new Circle(id, 0, 0, 1), /invalid id/);
+  }
+  doc.validate();
+});

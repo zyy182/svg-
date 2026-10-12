@@ -113,11 +113,16 @@ test("course move/undo/redo feedback includes resulting coordinates", () => {
   assert.equal(s.redo(), "circle#c1 moved to (130,100)");
 });
 
-test("history stays bounded and does not contain IO commands", () => {
+test("all successful edits remain undoable beyond one hundred commands", () => {
   const s = new DocumentSession(new MemoryStore()), f = new ShapeFactory(); s.execute(new InitCommand(s));
   s.execute(new CreateCommand(s, f, "g", "g", []));
-  for (let index = 0; index < 101; index++) s.execute(new MoveCommand(s, "g", 1, 0));
-  assert.deepEqual(s.historyCounts, [100, 0]);
+  for (let index = 0; index < 150; index++) s.execute(new MoveCommand(s, "g", 1, 0));
+  assert.deepEqual(s.historyCounts, [151, 0]);
+  for (let index = 0; index < 151; index++) s.undo();
+  assert.equal(s.requireDocument().all().length, 0);
+  assert.deepEqual(s.historyCounts, [0, 151]);
+  for (let index = 0; index < 151; index++) s.redo();
+  assert.equal(s.requireDocument().find("g").type, "g");
 });
 
 test("partial overflow across a composite rolls back the entire editing command", () => {

@@ -7,6 +7,7 @@ import { ValueRules } from "./ValueRules";
 export abstract class Shape {
   private readonly geometry = new Map<string, number>();
   private readonly appearance = new Map<string, string>();
+  private readonly metadata = new Map<string, string>();
   private owner: ShapeContainer | undefined;
   private transform: AffineTransform | undefined;
   protected readonly editableGeometry: ReadonlySet<string>;
@@ -83,6 +84,7 @@ export abstract class Shape {
       if (this.geometry.has(key)) {
         this.assignGeometry(key, value.endsWith("px") ? value.slice(0, -2) : value);
       } else if (Shape.importedAppearance.has(key)) this.setAppearance(key, value);
+      else if (key === "data-kind") { ValueRules.xmlText(value); this.metadata.set(key, value); }
       else if (key === "transform") this.transform = AffineTransform.parse(value);
       else throw new EditorError(`unsupported SVG attribute: ${key}`);
     }
@@ -93,6 +95,7 @@ export abstract class Shape {
 
   protected copyAppearanceTo(target: Shape): void {
     for (const [key, value] of this.appearance) target.appearance.set(key, value);
+    for (const [key, value] of this.metadata) target.metadata.set(key, value);
     target.transform = this.transform;
   }
 
@@ -134,7 +137,7 @@ export abstract class Shape {
   protected contentSvg(): string { return ""; }
   toSvg(): string {
     const attrs = new Map<string, string>([["id", this.id], ...[...this.geometry].map(
-      ([key, value]): [string, string] => [key, String(value)]), ...this.appearance]);
+      ([key, value]): [string, string] => [key, String(value)]), ...this.appearance, ...this.metadata]);
     if (this.transform) attrs.set("transform", this.transform.toSvg());
     const text = [...attrs].map(([key, value]) => ` ${key}="${ValueRules.escape(value)}"`).join("");
     const content = this.contentSvg();

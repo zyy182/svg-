@@ -95,9 +95,10 @@ export class Document implements ShapeContainer {
     if (!container) throw new EditorError(`not a container: ${id}`);
     const parent = shape.parent!;
     if (parent === this) throw new EditorError(`cannot ungroup top-level container: ${id}`);
-    if (Number(shape.attribute("opacity") ?? 1) !== 1) throw new EditorError(`cannot preserve group opacity when ungrouping: ${id}`);
     const index = parent.children.indexOf(shape);
     const children = [...container.children];
+    // Ungroup is structural: inherited paint/transforms follow the children;
+    // non-inherited effects such as group compositing opacity disappear with it.
     for (const child of children) { child.freezeRelativeFontWeight(); child.inheritFrom(shape); }
     parent.remove(shape);
     children.forEach((child, offset) => parent.insert(child, index + offset));

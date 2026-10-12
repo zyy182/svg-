@@ -9,11 +9,12 @@ export class SvgCodec {
   constructor(private readonly factory = new ShapeFactory()) {}
   parse(source: string): { document: Document; warnings: readonly string[] } {
     if (Buffer.byteLength(source, "utf8") > 5 * 1024 * 1024) throw new EditorError("SVG exceeds 5 MiB");
-    if (/<!\s*(DOCTYPE|ENTITY)\b/i.test(source)) throw new EditorError("DOCTYPE and ENTITY are not supported");
     const parser = new SaxesParser({ xmlns: true });
     const stack: SvgElement[] = [];
     let root: SvgElement | undefined, namespace: string | undefined, count = 0;
     parser.on("error", error => { throw new EditorError(`invalid SVG XML: ${error.message}`); });
+    // Reject declarations at the XML parser boundary, not text that happens to
+    // mention their spelling inside a legal comment or CDATA section.
     parser.on("doctype", () => { throw new EditorError("DOCTYPE is not supported"); });
     parser.on("processinginstruction", () => { throw new EditorError("XML processing instructions are not supported"); });
     parser.on("opentag", tag => {

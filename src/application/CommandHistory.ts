@@ -5,7 +5,7 @@ export class CommandHistory {
   private readonly undoStack: Command[] = [];
   private readonly redoStack: Command[] = [];
   private ioBarrier = false;
-  constructor(private readonly limit = 100) {}
+  constructor(private readonly limit = Infinity) {}
   execute(command: Command): string {
     const result = command.execute();
     if (command.undoable) {
