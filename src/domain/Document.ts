@@ -121,8 +121,13 @@ export class Document implements ShapeContainer {
     visit(this, 1);
   }
   clone(): Document {
+    this.validate();
     const result = new Document(this.width, this.height); result.viewBox = this.viewBox;
-    for (const shape of this.items) result.insert(shape.clone());
+    // Source IDs and ownership have already been validated. Reusing insert
+    // would rescan all preceding roots for each copy and make snapshots O(N²).
+    for (const shape of this.items) {
+      const copy = shape.clone(); result.items.push(copy); copy.bindParent(result);
+    }
     return result;
   }
   toSvg(): string {
