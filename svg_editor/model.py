@@ -73,6 +73,12 @@ def validate_attributes(kind, attrs):
             values = numbers(value)
             if not values or any(x < 0 for x in values):
                 raise EditorError("stroke-dasharray 需要非负数值列表或 none")
+        elif key == "font-weight":
+            if value not in {"normal", "bold", "bolder", "lighter"}:
+                if not re.fullmatch(r"[1-9]00", value):
+                    raise EditorError("font-weight 支持 normal/bold/bolder/lighter 或 100…900")
+        elif key == "font-family" and not value.strip():
+            raise EditorError("font-family 不能为空")
         elif key in {"stroke-linecap", "stroke-linejoin", "text-anchor", "fill-rule"}:
             choices = {"stroke-linecap": {"butt", "round", "square"},
                        "stroke-linejoin": {"miter", "round", "bevel"},

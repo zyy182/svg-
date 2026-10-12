@@ -132,12 +132,16 @@ def load_svg(path):
         if len(data) > MAX_FILE_BYTES:
             raise EditorError("SVG 文件不能超过 5 MiB")
         return parse_svg(data.decode("utf-8-sig"))
-    except (OSError, UnicodeError) as exc:
+    except (OSError, UnicodeError, ValueError) as exc:
+        if isinstance(exc, EditorError):
+            raise
         raise EditorError("读取失败：{}".format(exc)) from exc
 
 
 def save_svg(document, path):
     content = serialize_svg(document)
+    if len(content.encode("utf-8")) > MAX_FILE_BYTES:
+        raise EditorError("保存的 SVG 超过 5 MiB，无法在本编辑器中再次读取")
     destination = Path(path)
     temporary = None
     try:
@@ -153,4 +157,8 @@ def save_svg(document, path):
         raise EditorError("保存失败：{}".format(exc)) from exc
     finally:
         if temporary is not None and temporary.exists():
-            temporary.unlink()
+            try:
+                temporary.unlink()
+            except OSError:
+                # Cleanup must not hide the original save error.
+                pass

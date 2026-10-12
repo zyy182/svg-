@@ -10,6 +10,8 @@ NUMBER = r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?"
 
 
 def number(value):
+    if isinstance(value, str) and not re.fullmatch(NUMBER, value.strip()):
+        raise EditorError("需要合法 SVG 数值：{}".format(value))
     try:
         result = float(value)
     except (TypeError, ValueError, OverflowError) as exc:
@@ -89,7 +91,13 @@ def parse_transform(source):
             raise EditorError("不支持的变换或参数数量：{}".format(kind))
         result = multiply(result, matrix)
         remaining = remaining[match.end():]
-        if remaining and not re.match(r"[\s,]", remaining):
-            raise EditorError("变换之间需要空格或逗号")
-        remaining = remaining.lstrip(" \t\r\n,")
+        if remaining.strip():
+            separator = re.match(r"\s*(?:,\s*|\s+)", remaining)
+            if not separator:
+                raise EditorError("变换之间需要空格或逗号")
+            remaining = remaining[separator.end():]
+            if not remaining or remaining.startswith(","):
+                raise EditorError("变换列表不能包含重复或末尾逗号")
+        else:
+            remaining = ""
     return result

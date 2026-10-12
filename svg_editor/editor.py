@@ -49,7 +49,10 @@ class Editor:
         self._replace(document, Path(path).resolve(), saved=True)
 
     def save(self, path=None):
-        destination = Path(path).resolve() if path is not None else self.path
+        try:
+            destination = Path(path).resolve() if path is not None else self.path
+        except (OSError, ValueError) as exc:
+            raise EditorError("无效的保存路径：{}".format(exc)) from exc
         if destination is None:
             raise EditorError("首次保存需要指定路径：save 文件.svg")
         save_svg(self.document, destination)
