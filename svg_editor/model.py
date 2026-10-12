@@ -171,6 +171,35 @@ class Document:
             raise EditorError("找不到元素：{}".format(identifier))
         return result
 
+    def computed_font_weight(self, identifier):
+        """Resolve relative font weights along the ancestry of one node."""
+        def resolve(value, inherited):
+            if value == "normal":
+                return 400
+            if value == "bold":
+                return 700
+            if value == "bolder":
+                return 400 if inherited < 400 else (700 if inherited < 600 else 900)
+            if value == "lighter":
+                return 100 if inherited < 600 else (400 if inherited < 800 else 700)
+            return int(value)
+
+        def visit(children, inherited):
+            for child in children:
+                weight = resolve(child.attrs["font-weight"], inherited) if "font-weight" in child.attrs else inherited
+                if child.identifier == identifier:
+                    return weight
+                found = visit(child.children, weight)
+                if found is not None:
+                    return found
+            return None
+
+        root_weight = resolve(self.attrs.get("font-weight", "normal"), 400)
+        result = visit(self.children, root_weight)
+        if result is None:
+            raise EditorError("找不到元素：{}".format(identifier))
+        return result
+
     def container(self, parent):
         if parent == "root":
             return self.children
@@ -252,6 +281,10 @@ class Document:
         group_matrix = parse_transform(node.attrs.get("transform", ""))
         children = deepcopy(node.children)
         for child in children:
+            # Removing an ancestor changes the meaning of bolder/lighter.
+            # Freeze the child's computed value before flattening the group.
+            if child.attrs.get("font-weight") in {"bolder", "lighter"}:
+                child.attrs["font-weight"] = str(self.computed_font_weight(child.identifier))
             child.attrs = dict(inherited, **child.attrs)
             if "transform" in node.attrs:
                 child.attrs["transform"] = matrix_text(multiply(

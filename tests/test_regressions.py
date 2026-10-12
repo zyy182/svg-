@@ -116,6 +116,24 @@ class RegressionTests(unittest.TestCase):
             self.assertEqual(document.find("n1").attrs, {"r": "1"})
         self.assertEqual(parse_svg('<svg><line/></svg>').children[0].kind, "line")
 
+    def test_ungroup_preserves_relative_font_weights(self):
+        document = Document(attrs={"font-weight": "400"})
+        document.add("g", "outer", {"font-weight": "bolder"})
+        document.add("text", "title", {"font-weight": "bolder"}, parent="outer", text="标题")
+        document.add("g", "inner", {"font-weight": "lighter"}, parent="outer")
+        document.add("text", "caption", parent="inner", text="说明")
+        before = [document.computed_font_weight(identifier) for identifier in ("title", "caption")]
+        self.assertEqual(before, [900, 400])
+        document.ungroup("outer")
+        self.assertEqual([document.computed_font_weight(identifier)
+                          for identifier in ("title", "caption")], before)
+
+    def test_mixed_namespaces_are_not_silently_converted(self):
+        for source in ('<svg xmlns="http://www.w3.org/2000/svg"><circle xmlns="" r="1"/></svg>',
+                       '<svg><circle xmlns="http://www.w3.org/2000/svg" r="1"/></svg>'):
+            with self.assertRaises(EditorError):
+                parse_svg(source)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -65,6 +65,8 @@ def parse_svg(source):
         count += 1
         if depth > MAX_DEPTH or count > MAX_NODES:
             raise EditorError("SVG 超出限制：最多 10000 个元素、128 层嵌套")
+        if element.tag.startswith("{") != root.tag.startswith("{"):
+            raise EditorError("元素命名空间必须与根 SVG 一致")
         kind = tag_name(element.tag)
         if kind not in SHAPES:
             raise EditorError("不支持的 SVG 元素：{}".format(kind))
