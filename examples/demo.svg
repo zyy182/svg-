@@ -1,2 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" version="1.1"><rect id="background" x="0" y="0" width="640" height="400" fill="#f4f6fb" /><g id="artwork" transform="matrix(1.1000000000000001 0 0 1.1000000000000001 -9.0000000000000284 7)"><rect id="card" x="80" y="80" width="180" height="100" rx="12" fill="#336699" stroke="#20334d" stroke-width="2" /><circle id="dot" cx="310" cy="130" r="40" fill="#df7647" /></g><text id="title" x="80" y="45" font-size="26" fill="#20334d">CLI SVG 编辑器</text></svg>
