@@ -131,8 +131,10 @@ class Document:
             raise EditorError("根 SVG 不支持 transform")
         seen, objects = set(), set()
 
-        def visit(children):
+        def visit(children, depth=1):
             for node in children:
+                if depth > 128 or len(objects) >= 10000:
+                    raise EditorError("文档最多包含 10000 个元素、128 层嵌套")
                 if id(node) in objects:
                     raise EditorError("树中存在重复引用或循环")
                 objects.add(id(node))
@@ -140,7 +142,7 @@ class Document:
                 if node.identifier in seen:
                     raise EditorError("重复 ID：{}".format(node.identifier))
                 seen.add(node.identifier)
-                visit(node.children)
+                visit(node.children, depth + 1)
         visit(self.children)
 
     def find(self, identifier):
