@@ -40,6 +40,10 @@ npm test
 - [doc/README.md](doc/README.md)：指定的架构方案、PlantUML 图、设计模式、依赖规则、变化点、AI 协作记录、一致性自查与质量保证。
 - [doc/QA.md](doc/QA.md)：实际测试结果和按课程会话的验收记录。
 - [doc/requirement-audit.md](doc/requirement-audit.md)：从最初摘要版本修订为完整作业要求的真实记录。
-- [doc/architecture.puml](doc/architecture.puml) 与 [架构图](doc/architecture.svg)：可编辑的 PlantUML 源和可直接预览的配套图。
+- [doc/acceptance.md](doc/acceptance.md)：课程要求、实现与验收证据的逐项对照。
+- [doc/DEMO.md](doc/DEMO.md)：演示步骤与设计讲解提纲。
+- [doc/architecture.puml](doc/architecture.puml) 与 [架构图](doc/architecture.svg)：可编辑的 PlantUML 源和由其渲染的 SVG。
+
+54 项测试已通过，覆盖课程命令会话、异常状态、完整撤销重做及 300 次混合编辑。Linux、Windows、macOS 的 [GitHub 自动验收](https://github.com/zyy182/svg-/actions/workflows/ci.yml) 已通过。
 
 Git 历史保留真实阶段提交；`main` 与最终版 `final` 标签已推送到私有仓库 [zyy182/svg-](https://github.com/zyy182/svg-)。仓库保留了 GitHub 创建时的初始提交以及后续真实开发提交。
