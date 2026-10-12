@@ -1,0 +1,17 @@
+# 从工程根目录执行：python3 main.py --script examples/demo.commands
+new 640 400
+add rect id=background x=0 y=0 width=640 height=400 fill="#f4f6fb"
+add rect id=card x=80 y=80 width=180 height=100 rx=12 fill="#336699" stroke="#20334d" stroke-width=2
+add circle id=dot cx=310 cy=130 r=40 fill="#e9a33b"
+group artwork card dot
+move artwork 10 20
+scale artwork 1.1 1.1 200 150
+add text id=title x=80 y=45 text="CLI SVG 编辑器" font-size=26 fill="#20334d"
+set dot fill="#df7647"
+undo
+redo
+tree
+history
+save examples/demo.svg
+status
+quit
