@@ -7,6 +7,7 @@ export class Text extends Shape {
     ValueRules.xmlText(text);
   }
   override get type(): string { return "text"; }
+  protected override get position(): readonly [number, number] { return [this.value("x"), this.value("y")]; }
   override move(dx: number, dy: number): void { this.offset(["x"], ["y"], dx, dy); }
   override set(attribute: string, value: string): void {
     if (attribute === "text") { ValueRules.xmlText(value); this.text = value; }

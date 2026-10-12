@@ -28,6 +28,12 @@ export abstract class Shape {
   abstract move(dx: number, dy: number): void;
   abstract clone(): Shape;
   abstract summary(): string;
+  protected get position(): readonly [number, number] | undefined { return undefined; }
+  movementFeedback(dx: number, dy: number, undo = false): string {
+    const point = this.position;
+    return point ? `${this.label} moved ${undo ? "back " : ""}to (${point[0]},${point[1]})`
+      : `${this.label} moved ${undo ? "back " : ""}by (${dx},${dy})`;
+  }
   get id(): string { return this.identifier; }
   get label(): string { return `${this.type}#${this.id}`; }
   get parent(): ShapeContainer | undefined { return this.owner; }

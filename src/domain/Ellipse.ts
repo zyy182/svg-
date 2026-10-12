@@ -5,6 +5,7 @@ export class Ellipse extends Shape {
     super(id, { cx, cy, rx, ry }, ["cx", "cy", "rx", "ry"], new Set(["rx", "ry"]));
   }
   override get type(): string { return "ellipse"; }
+  protected override get position(): readonly [number, number] { return [this.value("cx"), this.value("cy")]; }
   override move(dx: number, dy: number): void { this.offset(["cx"], ["cy"], dx, dy); }
   override clone(): Ellipse {
     const result = new Ellipse(this.id, this.value("cx"), this.value("cy"), this.value("rx"), this.value("ry"));

@@ -5,6 +5,7 @@ export class Line extends Shape {
     super(id, { x1, y1, x2, y2 }, ["x1", "y1", "x2", "y2"]);
   }
   override get type(): string { return "line"; }
+  protected override get position(): readonly [number, number] { return [this.value("x1"), this.value("y1")]; }
   override move(dx: number, dy: number): void { this.offset(["x1", "x2"], ["y1", "y2"], dx, dy); }
   override clone(): Line {
     const result = new Line(this.id, this.value("x1"), this.value("y1"), this.value("x2"), this.value("y2"));

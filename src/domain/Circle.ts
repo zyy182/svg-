@@ -5,6 +5,7 @@ export class Circle extends Shape {
     super(id, { cx, cy, r }, ["cx", "cy", "r"], new Set(["r"]));
   }
   override get type(): string { return "circle"; }
+  protected override get position(): readonly [number, number] { return [this.value("cx"), this.value("cy")]; }
   override move(dx: number, dy: number): void { this.offset(["cx"], ["cy"], dx, dy); }
   override clone(): Circle {
     const result = new Circle(this.id, this.value("cx"), this.value("cy"), this.value("r"));
