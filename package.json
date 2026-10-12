@@ -1,0 +1,14 @@
+{
+  "name": "pj1-svg-editor",
+  "version": "2.0.0",
+  "private": true,
+  "description": "PJ1 Phase 1 TypeScript CLI SVG editor",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "cli": "tsc -p tsconfig.json && node dist/src/main.js",
+    "test": "tsc -p tsconfig.json && node --test dist/test/*.test.js"
+  },
+  "engines": { "node": ">=22" },
+  "dependencies": { "saxes": "6.0.0" },
+  "devDependencies": { "@types/node": "22.20.5", "typescript": "5.9.3" }
+}
