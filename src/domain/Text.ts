@@ -13,6 +13,7 @@ export class Text extends Shape {
     else super.set(attribute, value);
   }
   override attribute(key: string): string | undefined { return key === "text" ? this.text : super.attribute(key); }
+  override acceptSvgText(text: string): void { ValueRules.xmlText(text); this.text = text; }
   override clone(): Text {
     const result = new Text(this.id, this.value("x"), this.value("y"), this.text);
     this.copyAppearanceTo(result); return result;

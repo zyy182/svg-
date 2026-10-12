@@ -81,6 +81,9 @@ export abstract class Shape {
       else throw new EditorError(`unsupported SVG attribute: ${key}`);
     }
   }
+  acceptSvgText(text: string): void {
+    if (text.trim()) throw new EditorError(`${this.type} cannot contain text`);
+  }
 
   protected copyAppearanceTo(target: Shape): void {
     for (const [key, value] of this.appearance) target.appearance.set(key, value);
