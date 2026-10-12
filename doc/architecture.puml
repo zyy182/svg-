@@ -2,44 +2,44 @@
 title PJ1 Phase 1 — TypeScript CLI SVG editor
 skinparam componentStyle rectangle
 package "src/cli" {
-  [Cli]
-  [CommandRegistry\n(command-name mapping)]
-  [Tokenizer]
+  component Cli
+  component "CommandRegistry\n(command mapping)" as Registry
+  component Tokenizer
 }
 package "src/application" {
-  [DocumentSession]
-  [CommandHistory]
-  [Command / EditCommand]
-  [Concrete commands]
+  component DocumentSession
+  component CommandHistory
+  component "Command / EditCommand" as Commands
+  component "Concrete commands" as Concrete
   interface DocumentStore
 }
 package "src/domain" {
-  [Document]
-  [Shape / Group / Leaves]
-  [ShapeFactory\n(shape-name mapping)]
-  [ValueRules / AffineTransform]
+  component Document
+  component "Shape / Group / Leaves" as Shapes
+  component "ShapeFactory\n(shape mapping)" as Factory
+  component "ValueRules / AffineTransform" as Rules
 }
 package "src/infrastructure" {
-  [SvgFileStore]
-  [SvgCodec / SvgElement]
+  component SvgFileStore
+  component "SvgCodec / SvgElement" as Codec
 }
-[Cli] --> [CommandRegistry\n(command-name mapping)]
-[Cli] --> [Tokenizer]
-[CommandRegistry\n(command-name mapping)] --> [Concrete commands]
-[Concrete commands] --> [Command / EditCommand]
-[Command / EditCommand] --> [DocumentSession]
-[DocumentSession] --> [CommandHistory]
-[DocumentSession] --> DocumentStore
-[DocumentSession] --> [Document]
-[Concrete commands] --> [ShapeFactory\n(shape-name mapping)]
-[ShapeFactory\n(shape-name mapping)] --> [Shape / Group / Leaves]
-[Document] --> [Shape / Group / Leaves]
-[Shape / Group / Leaves] --> [ValueRules / AffineTransform]
-[SvgFileStore] ..|> DocumentStore
-[SvgFileStore] --> [SvgCodec / SvgElement]
-[SvgCodec / SvgElement] --> [Document]
-[SvgCodec / SvgElement] --> [ShapeFactory\n(shape-name mapping)]
-note bottom of [CommandRegistry\n(command-name mapping)]
+Cli --> Registry
+Cli --> Tokenizer
+Registry --> Concrete
+Concrete --> Commands
+Commands --> DocumentSession
+DocumentSession --> CommandHistory
+DocumentSession --> DocumentStore
+DocumentSession --> Document
+Concrete --> Factory
+Factory --> Shapes
+Document --> Shapes
+Shapes --> Rules
+SvgFileStore ..|> DocumentStore
+SvgFileStore --> Codec
+Codec --> Document
+Codec --> Factory
+note bottom of Registry
 The two name-based mappings are explicit
 Phase 2 refactoring points for providers.
 end note

@@ -1,51 +1,45 @@
-# CLI SVG 编辑器
+# PJ1 Phase 1：CLI SVG 编辑器
 
-PJ1 Phase 1：通过终端创建、读取、保存 SVG，编辑基础图形，管理分组，查看结构，并支持撤销与重做。使用 Python 3.9+ 标准库，无须安装第三方依赖。
+本工程按照完整的 `phase_cli_1.md` 实现 TypeScript 命令行 SVG 编辑器。内置 rect、circle、ellipse、line、text、g 六类图形，使用面向对象图形层次与 Command 模式。`box` 是后续插件阶段的目标，本阶段按要求报 `unknown shape type`。
 
 ## 运行
 
-在工程根目录执行：
+需要 Node.js 22 或以上版本。在工程目录执行：
 
 ```sh
-python3 main.py
-# 或
-python3 -m svg_editor
+npm ci
+npm run cli
 ```
 
-输入 `help` 查看命令，`help add` 查看各图形属性。示例：
+当前这台 Mac 的普通终端尚未安装全局 Node.js；本次开发使用 Codex 提供的 Node.js 运行环境。依赖已经装在本工程中，可以双击 [启动编辑器.command](启动编辑器.command) 打开终端编辑器。使用 `help` 查看完整命令。
+
+命令示例：
 
 ```text
-new 800 600
-add rect id=box x=20 y=30 width=120 height=80 fill="#336699"
-add circle id=ball cx=220 cy=80 r=40 fill=orange
-group artwork box ball
-move artwork 10 20
-scale artwork 1.2
-set ball fill=red
-undo
-redo
+init 800 600
+create g scene
+create rect box 10 20 100 50 #4a90d9 in scene
+create text label 20 50 "开始" in scene
+move scene 30 0
+scale box 2
 tree
-save "my drawing.svg"
-quit
+save diagram.svg
 ```
 
-命令包括 `new`、`open`、`save`、`add`、`move`、`scale`、`group`、`ungroup`、`delete`、`set`、`unset`、`tree`、`show`、`undo`、`redo`、`history`、`status`、`help`、`quit`，共 19 个。
-
-新建、读取和退出前若有未保存修改，先保存，或明确使用 `--force` 放弃修改。移动与缩放作用于元素所在父坐标系；分组成员要求是连续同级元素，以保留绘制顺序。详细语义与兼容范围见 [项目文档](doc/README.md)。
-
-## 演示与测试
+也可一次运行演示：
 
 ```sh
-python3 main.py --script examples/demo.commands
-python3 main.py --file examples/demo.svg
-python3 -m unittest discover -v
+npm run cli -- --script examples/flowchart.commands
+npm test
 ```
 
-演示脚本会生成 [examples/demo.svg](examples/demo.svg)，可直接用浏览器查看。批处理遇错停止，返回非零退出码；只支持整行 `#` 注释。
+演示生成 [examples/flowchart.svg](examples/flowchart.svg)，可用浏览器打开。`--script` 在首条错误处停止；普通 REPL 会显示一行 `error:` 后继续读下一条命令。任何文档操作（init/read/save/canvas 修改）执行后，undo/redo 受屏障限制，直到下一条成功编辑。
 
-## 提交材料
+## 提交与文档
 
-- [doc/README.md](doc/README.md)：架构设计、AI 协作记录、功能清单、一致性自查、质量保证与 Git 说明。
-- [doc/QA.md](doc/QA.md)：实际执行的测试及验收记录。
-- 本地 Git 历史按真实阶段提交；`final` 标签用于标记本地最终版本。
-- 目标远程仓库：`https://github.com/zyy182/svg-`。远程推送需要 GitHub 认证，目前尚未完成。
+- [doc/README.md](doc/README.md)：指定的架构方案、PlantUML 图、设计模式、依赖规则、变化点、AI 协作记录、一致性自查与质量保证。
+- [doc/QA.md](doc/QA.md)：实际测试结果和按课程会话的验收记录。
+- [doc/requirement-audit.md](doc/requirement-audit.md)：从最初摘要版本修订为完整作业要求的真实记录。
+- [doc/architecture.puml](doc/architecture.puml) 与 [架构图](doc/architecture.svg)：可编辑的 PlantUML 源和可直接预览的配套图。
+
+Git 历史保留真实阶段提交；本地 `final` 标签指向最终提交。目标远程仓库是私有的 `https://github.com/zyy182/svg-`。截至本次验收，当前机器缺少 GitHub Git 认证，代码与标签尚未推送。
