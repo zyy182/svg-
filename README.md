@@ -42,4 +42,4 @@ npm test
 - [doc/requirement-audit.md](doc/requirement-audit.md)：从最初摘要版本修订为完整作业要求的真实记录。
 - [doc/architecture.puml](doc/architecture.puml) 与 [架构图](doc/architecture.svg)：可编辑的 PlantUML 源和可直接预览的配套图。
 
-Git 历史保留真实阶段提交；本地 `final` 标签指向最终提交。目标远程仓库是私有的 `https://github.com/zyy182/svg-`。截至本次验收，当前机器缺少 GitHub Git 认证，代码与标签尚未推送。
+Git 历史保留真实阶段提交；`main` 与最终版 `final` 标签已推送到私有仓库 [zyy182/svg-](https://github.com/zyy182/svg-)。仓库保留了 GitHub 创建时的初始提交以及后续真实开发提交。
