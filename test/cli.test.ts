@@ -128,3 +128,46 @@ test("missing command script reports exactly one error line", () => {
   const result = spawnSync(process.execPath, ["dist/src/main.js", "--script", "/nonexistent-svg-course-script.txt"], { encoding: "utf8" });
   assert.equal(result.status, 1); assert.equal(result.stderr.trim().split("\n").length, 1); assert.ok(result.stderr.startsWith("error: "));
 });
+
+test("failed save to a read-only file preserves document, path and redo history", {
+  skip: process.platform === "win32" ? "POSIX file mode permissions" : false,
+}, () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "svg-ts-save-state-"));
+  const original = path.join(directory, "original.svg"), readonly = path.join(directory, "readonly.svg");
+  try {
+    fs.writeFileSync(readonly, "keep", { mode: 0o444 });
+    const session = new DocumentSession(new SvgFileStore()), cli = new Cli(session);
+    cli.execute("init"); cli.execute('create text t 1 2 "中文"');
+    cli.execute(`save "${original}"`);
+    cli.execute("move t 3 4"); cli.execute("undo");
+    const before = session.requireDocument().toSvg(), history = session.historyCounts;
+    assert.throws(() => cli.execute(`save "${readonly}"`), { message: `cannot write file: ${readonly}` });
+    assert.equal(session.requireDocument().toSvg(), before);
+    assert.equal(session.filePath, original);
+    assert.deepEqual(session.historyCounts, history);
+    assert.equal(fs.readFileSync(readonly, "utf8"), "keep");
+    cli.execute("redo"); assert.equal(session.requireDocument().find("t").attribute("x"), "4");
+    cli.execute("save");
+    assert.equal(new SvgFileStore().read(original).document.find("t").attribute("x"), "4");
+  } finally {
+    fs.chmodSync(readonly, 0o600);
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("late SVG import failure preserves active document, path and redo branch", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "svg-ts-read-state-"));
+  try {
+    const original = path.join(directory, "original.svg"), invalid = path.join(directory, "invalid.svg");
+    const session = new DocumentSession(new SvgFileStore()), cli = new Cli(session);
+    cli.execute("init"); cli.execute("create circle c 1 2 3"); cli.execute(`save "${original}"`);
+    cli.execute("move c 10 20"); cli.execute("undo");
+    const before = session.requireDocument().toSvg(), history = session.historyCounts;
+    // A valid anonymous shape is converted before the unsupported child fails.
+    fs.writeFileSync(invalid, '<svg><rect width="10" height="20"/><g id="bad"><path/></g></svg>');
+    assert.throws(() => cli.execute(`read "${invalid}"`), /unknown shape type: path/);
+    assert.equal(session.requireDocument().toSvg(), before);
+    assert.equal(session.filePath, original); assert.deepEqual(session.historyCounts, history);
+    cli.execute("redo"); assert.equal(session.requireDocument().find("c").attribute("cx"), "11");
+  } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});

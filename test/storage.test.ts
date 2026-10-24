@@ -106,3 +106,22 @@ test("limits apply before unbounded parsing or writing", () => {
   assert.throws(() => codec.parse("<svg>" + "<g>".repeat(129) + "</g>".repeat(129) + "</svg>"), /limit/);
   assert.throws(() => codec.parse(" ".repeat(5 * 1024 * 1024 + 1)), /5 MiB/);
 });
+
+test("atomic save refuses an existing read-only file and leaves no temporary file", {
+  skip: process.platform === "win32" ? "POSIX file mode permissions" : false,
+}, () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "svg-ts-readonly-"));
+  const target = path.join(directory, "readonly.svg");
+  const original = '<svg><circle id="original" r="1"/></svg>';
+  try {
+    fs.writeFileSync(target, original, { mode: 0o444 });
+    assert.throws(() => new SvgFileStore().write(target, new Document()), {
+      message: `cannot write file: ${target}`,
+    });
+    assert.equal(fs.readFileSync(target, "utf8"), original);
+    assert.deepEqual(fs.readdirSync(directory), ["readonly.svg"]);
+  } finally {
+    fs.chmodSync(target, 0o600);
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});

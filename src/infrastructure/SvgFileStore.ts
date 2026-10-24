@@ -28,6 +28,13 @@ export class SvgFileStore extends DocumentStore {
     let temporary: string | undefined, descriptor: number | undefined;
     try {
       const destination = path.resolve(file);
+      // Renaming a temporary file only checks the parent directory on POSIX;
+      // without this check it can silently replace a read-only destination.
+      if (fs.existsSync(destination)) {
+        const mode = fs.statSync(destination).mode;
+        if (process.platform !== "win32" && (mode & 0o222) === 0) throw new Error("read-only destination");
+        fs.accessSync(destination, fs.constants.W_OK);
+      }
       temporary = path.join(path.dirname(destination), `.svg-editor-${randomUUID()}.tmp`);
       descriptor = fs.openSync(temporary, "wx", 0o600);
       fs.writeFileSync(descriptor, source, "utf8"); fs.fsyncSync(descriptor); fs.closeSync(descriptor); descriptor = undefined;
