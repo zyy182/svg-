@@ -1,6 +1,6 @@
 # 课程要求与验收证据
 
-依据：用户提供的完整 `phase_cli_1.md`，核对日期 2026-10-12。这里对照可验证的要求，不预估老师的分数，也不把未知隐藏测试算作通过。
+依据：用户提供的完整 `phase_cli_1.md`，最近核对日期 2026-10-25。这里对照可验证的要求，不预估老师的分数，也不把未知隐藏测试算作通过。
 
 ## 提交与设计
 
@@ -26,7 +26,7 @@
 | error: 单行、失败不改变任何状态 | EditorError、Cli；EditCommand 副本发布 | 指定错误文本、文件路径/历史/文档不变；真实 CLI 继续读下一条 |
 | init [w] [h] | InitCommand、DocumentSession | 默认 800×600、单参数默认高度、非法尺寸失败不影响状态 |
 | read file.svg | ReadCommand、SvgFileStore、SvgCodec | 六类与嵌套 SVG 往返、UTF-8/BOM、缺文件、非法 XML、缺 ID 警告 |
-| save [file.svg] | SaveCommand、SvgFileStore | 读入后无参数保存、路径包含中文/空格、写失败及原子替换清理 |
+| save [file.svg] | SaveCommand、SvgFileStore | 读入后无参数保存、路径包含中文/空格、写失败、只读目标拒绝、失败后路径与 redo 保留及原子替换清理 |
 | canvas [w] [h] | CanvasCommand、Document | 无参数只查询；有参数修改并建立 IO 屏障 |
 | create 六类、所有类型 in 尾缀 | CreateCommand、ShapeFactory、Arguments | 各类型位置参数、默认省略 fill/stroke、未知类型、父容器错误 |
 | delete id | DeleteCommand、Document | 删除整个多层节点后所有子孙消失，undo 精确恢复结构和顺序 |
@@ -49,6 +49,6 @@
 
 固定种子的 300 次混合编辑覆盖创建、变换、属性、分组、归属、层次和解组；每步验证树及 SVG 往返，错误后文档与历史保持原状，最后完整撤销并重做全部成功编辑。测试不依赖随机种子变化，可重复定位。
 
-本机严格编译与 54 项测试通过；Linux + Node.js 22、Windows + Node.js 22、macOS + Node.js 24 的 GitHub CI 均通过，记录见 [QA.md](QA.md)。测试命令中的文件通配符加双引号，交给 Node 解析，遵循 [Node 测试命令的可移植性说明](https://r2.nodejs.org/docs/latest-jod/api/test.html#running-tests-from-the-command-line)。
+本次本机严格编译与 57 项测试通过。Linux + Node.js 22、Windows + Node.js 22、macOS + Node.js 24 的 CI 通过记录属于历史版本，本次新提交的远程 CI 需另行核验，记录见 [QA.md](QA.md)。测试命令中的文件通配符加双引号，交给 Node 解析，遵循 [Node 测试命令的可移植性说明](https://r2.nodejs.org/docs/latest-jod/api/test.html#running-tests-from-the-command-line)。
 
 第 4.4 节 box 及第 6.1 节版本 B 明确属于后续阶段，当前 create box 报指定未知类型错误。外部 SVG 的 `<g data-kind="box">` 以普通 g 处理，并保留标记。本阶段不实现 path/image/use、动态插件加载、样式表及外部资源。单文件限制 5 MiB、10000 元素、128 层；撤销历史不默认截断。解组删除容器自身的非继承合成效果，撤销能恢复；导入 transform 保留，而编辑修改其内部几何坐标。上述边界已在项目文档公开。

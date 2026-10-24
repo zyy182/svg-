@@ -12,7 +12,7 @@ npm test
 npm run cli -- --script examples/flowchart.commands
 ```
 
-测试应报告 54 项通过。流程图脚本输出 8 个元素，保存 `examples/flowchart.svg`；用浏览器打开，可以看到两个节点及连线。当前这台 Mac 已有依赖和工作区 Node，可双击根目录的 `启动编辑器.command` 进入交互编辑器。
+流程图脚本输出 8 个元素，保存 `examples/flowchart.svg`；用浏览器打开，可以看到两个节点及连线。macOS 用户安装本机 Node.js 并运行 `npm ci` 后，可双击根目录的 `启动编辑器.command` 进入交互编辑器。最新实测数量与环境见 [QA.md](QA.md)。
 
 ## 交互演示
 

@@ -1,6 +1,20 @@
 # PJ1 Phase 1 质量验证记录
 
-验证日期：2026-10-12。依据：用户提供的完整 `phase_cli_1.md`。本机环境：macOS，Node.js 24.19.0（Codex 工作区运行环境），TypeScript 5.9.3，saxes 6.0.0。对 TypeScript 版本使用 Node 原生测试；旧 Python 测试属于留在 Git 历史的早期摘要版本，不计入新版结果。
+历史验证日期：2026-10-12。依据：用户提供的完整 `phase_cli_1.md`。本机环境：macOS，Node.js 24.19.0（Codex 工作区运行环境），TypeScript 5.9.3，saxes 6.0.0。对 TypeScript 版本使用 Node 原生测试；旧 Python 测试属于留在 Git 历史的早期摘要版本，不计入新版结果。
+
+## 2026-10-25 最终复核
+
+本次在克隆的 `0b6da3a` 基础上检查并修订，运行环境为 macOS、Node.js 23.9.0、npm 10.9.2；依赖按 package-lock.json 安装。
+
+- `npm test`：TypeScript 严格编译通过；57 项测试，57 通过，0 失败，0 跳过。
+- 分布：领域 13、文件 12、Command/历史 11、CLI 13、静态架构 3、综合验收 5。
+- 新增的两项 POSIX 权限测试在 Windows 跳过；因此 Windows 预期为 55 通过、2 跳过。本次尚未重新验证远程跨平台 CI，下面的 CI 链接属于历史版本。
+- `npm run cli -- --script examples/flowchart.commands`：完整运行成功，保存 8 个元素，嵌套树、move/undo 与文本更新符合课程示例。
+- macOS 启动脚本：通过管道输入 init/create/show/quit，退出状态为 0，输出正确。
+
+修复的实际问题：临时文件原子替换在 POSIX 系统只检查父目录，可能覆盖权限为 0444 的目标文件。现在保存前检查写权限；失败时原文件内容保持不变，不留下临时文件，当前文档、保存路径和 redo 分支也保持不变。另补充非法 SVG 在部分节点已转换后失败的会话原子性回归。
+
+以下保留 2026-10-12 原始验证记录；其中的 54 项测试和跨平台结果是历史结果。
 
 ## 编译与自动化
 
@@ -39,4 +53,4 @@ GitHub Actions 使用锁文件安装依赖，分别执行 Linux + Node.js 22、W
 
 运行 `npm run cli -- --script examples/flowchart.commands` 会生成 examples/flowchart.svg：流程图包含 g、rect、text 和 line 共 8 个元素。运行时观察了嵌套树、节点 2 的移动/撤销及文字修改反馈；随后在浏览器中核对两个节点、文字与连线的实际呈现。macOS 启动脚本另用 init/create/show/quit 会话验证，可以正常进入编辑器并输出图形属性。
 
-尚未执行课程隐藏测试。课程第 4.4 节 `box` 是后续插件化阶段目标，本阶段 `create box` 明确报错；普通 SVG g 上的 data-kind 标记可以保留，按普通组处理。资源上限是 5 MiB、10000 元素、128 层；默认历史不截断，内存随成功编辑数增长。SVG 复杂外部类型会被拒绝而不是静默丢失；解组删除容器自身的非继承合成效果（如 opacity），undo 恢复。代码分阶段提交，`main` 与 `final` 已推送至私有仓库；推送后校验远程引用。
+尚未执行课程隐藏测试。课程第 4.4 节 `box` 是后续插件化阶段目标，本阶段 `create box` 明确报错；普通 SVG g 上的 data-kind 标记可以保留，按普通组处理。资源上限是 5 MiB、10000 元素、128 层；默认历史不截断，内存随成功编辑数增长。SVG 复杂外部类型会被拒绝而不是静默丢失；解组删除容器自身的非继承合成效果（如 opacity），undo 恢复。历史版本曾分阶段提交并推送 main/final；本次修订须重新推送并校验远程引用。

@@ -1,12 +1,15 @@
 #!/bin/zsh
 # macOS convenience launcher; the portable entry remains npm run cli.
 cd -- "$(dirname -- "$0")" || exit 1
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 task_node="$(command -v node)"
-if [[ -z "$task_node" ]]; then
-  task_node="$HOME/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node"
-fi
 if [[ ! -x "$task_node" ]]; then
   echo "未找到 Node.js。请安装 Node.js 22 或更新版本，然后运行 npm ci。"
+  read "task_answer?按回车关闭窗口。"
+  exit 1
+fi
+if ! "$task_node" -e 'process.exit(Number(process.versions.node.split(".")[0]) >= 22 ? 0 : 1)'; then
+  echo "需要 Node.js 22 或更新版本。请升级后重新启动。"
   read "task_answer?按回车关闭窗口。"
   exit 1
 fi
